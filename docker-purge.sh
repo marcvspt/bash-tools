@@ -75,7 +75,7 @@ function delete_networks() {
     fi
 }
 
-## Show the help panel
+## Help panel to show
 function help_panel() {
     local optarg_containers="${color_yellow}-c"
     local optarg_images="${color_yellow}-i"
@@ -101,7 +101,7 @@ function signal_handler() {
     exit 1
 }
 
-### Redirect Ctrl + C to a function
+### Redirect Ctrl + c to a function
 trap signal_handler INT
 
 # Main

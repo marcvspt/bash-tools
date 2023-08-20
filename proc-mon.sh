@@ -15,7 +15,7 @@ function signal_handler() {
 }
 
 function main () {
-    # Ctrl + c
+    # Redirect Ctrl + c to a function
     trap signal_handler INT
 
     tput civis

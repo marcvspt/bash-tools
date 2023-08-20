@@ -90,7 +90,7 @@ function help_panel() {
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_network} ${color_gray}192.168.1.0/29${color_end}\n"
 }
 
-## Ctrl + c function
+## Ctrl + C function
 function signal_handler() {
     echo -e "\n${symbol_interrupted} Exiting${color_end}\n"
     tput cnorm

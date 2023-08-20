@@ -102,7 +102,7 @@ function signal_handler() {
     exit 1
 }
 
-### Redirect Ctrl + C to a function
+### Redirect Ctrl + c to a function
 trap signal_handler INT
 
 # Main

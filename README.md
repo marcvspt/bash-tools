@@ -1,4 +1,4 @@
-# Collection of tools developed in bash
+# Bash tools
 
 ## Install
 ```bash

@@ -17,17 +17,17 @@ This tool delete all resources of docker:
 ```bash
 [o] Usage: ./docker-purge.sh
 
-	-c 	Delete containers.
+	-c  Delete containers.
 
-	-i 	Delete images.
+	-i  Delete images.
 
-	-v 	Delete volumes.
+	-v  Delete volumes.
 
-	-n 	Delete networks.
+	-n  Delete networks.
 
-	-a 	Delete all (containers, images, volumes, networks).
+	-a  Delete all (containers, images, volumes, networks).
 
-	-h 	Show this help message.
+	-h  Show this help message.
 
 ```
 
@@ -35,9 +35,9 @@ This tool delete all resources of docker:
 ```bash
 [o] Usage: ./network-scan.sh
 
-	-n <ip-network/prefix-mask>	The network with prefix to scan.
+	-n <ip-network/prefix-mask> The network with prefix to scan.
 
-	-h 				            Show this help pannel.
+	-h                          Show this help pannel.
 
 [o] Examples:
 
@@ -45,18 +45,18 @@ This tool delete all resources of docker:
 
 	[%] ./network-scan.sh -n 172.16.32.0/16
 
-	[%] ./network-scan.sh-n 192.168.1.0/29
+	[%] ./network-scan.sh -n 192.168.1.0/29
 ```
 
 ## Host port scanner
 ```bash
 [o] Usage: ./port-scan.sh
 
-	-d <ip-address or domain>	The IP, name or domain to scan.
+	-d <ip-address or domain>   The IP, name or domain to scan.
 
-	-p <port(s)>			    The ports that want to scan.
+	-p <port(s)>                The ports that want to scan.
 
-	-h 				            Show this help pannel.
+	-h                          Show this help pannel.
 
 [o] Examples:
 

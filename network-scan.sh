@@ -68,7 +68,7 @@ function check_host() {
 
     timeout 1 bash -c "ping -c 1 $host" &>/dev/null
 
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${color_gray}Host ${color_turquoise}$host ${color_gray}- ACTIVE"
     fi
 }

@@ -14,7 +14,7 @@ function signal_handler() {
     exit 1
 }
 
-function main () {
+function main() {
     # Redirect Ctrl + c to a function
     trap signal_handler INT
 

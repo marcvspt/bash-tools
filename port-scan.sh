@@ -70,7 +70,7 @@ function check_port() {
 
     timeout 1 bash -c "echo '' > /dev/tcp/$host/$port" &> /dev/null
 
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${color_gray}Port ${color_turquoise}$port${color_gray} - Open"
     fi
 }

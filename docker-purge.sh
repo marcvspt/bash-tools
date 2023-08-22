@@ -20,7 +20,7 @@ declare -r symbol_progress="${color_yellow}[#]"
 declare -r symbol_interrupted="${color_blue}[!]"
 declare -r symbol_completed="${color_green}[*]"
 
-# Check the execution privileges
+# Check if the user is root or is in the docker group
 if [[ $EUID -ne 0 ]] && [[ $(groups | grep -o '\bdocker\b') != "docker" ]]; then
     echo -e "\n${symbol_error} ${color_gray}This script requires root privileges or membership in the docker group.${color_end}\n"
     exit 1
@@ -29,7 +29,7 @@ fi
 # Functions
 ## Delete containers
 function delete_containers() {
-    local containers=$(docker container ls -aq)
+    local containers="$(docker container ls -aq 2>/dev/null)"
 
     if [[ $containers ]]; then
         echo -e "\n${symbol_progress} ${color_gray}Deleting all containers\n"
@@ -39,7 +39,7 @@ function delete_containers() {
 
 ## Delete images
 function delete_images() {
-    local images=$(docker image ls -q)
+    local images="$(docker image ls -q 2>/dev/null)"
 
     if [[ $images ]]; then
         echo -e "\n${symbol_progress} ${color_gray}Deleting all images\n"
@@ -49,7 +49,7 @@ function delete_images() {
 
 ## Delete volumes
 function delete_volumes() {
-    local volumes=$(docker volume ls -q)
+    local volumes="$(docker volume ls -q 2>/dev/null)"
 
     if [[ $volumes ]]; then
         echo -e "\n${symbol_progress} ${color_gray}Deleting all volumes\n"
@@ -59,7 +59,7 @@ function delete_volumes() {
 
 ## Delete networks (except the defaults)
 function delete_networks() {
-    local all_networks=$(docker network ls --format "{{.Name}}")
+    local all_networks="$(docker network ls --format '{{.Name}}' 2>/dev/null)"
     local default_networks=("bridge" "host" "none")
     local networks=()
 
@@ -147,8 +147,6 @@ while getopts ":civnah" arg; do
             ;;
     esac
 done
-
-# Check if the user is root or in the docker group
 
 if [[ $# -eq 0 ]]; then
     help_panel

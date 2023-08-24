@@ -2,64 +2,81 @@
 
 # Globarl vars
 ## Colors
-declare -r color_red="\e[0;31m\033[1m"
-declare -r color_green="\e[0;32m\033[1m"
-declare -r color_blue="\e[0;34m\033[1m"
-declare -r color_yellow="\e[0;33m\033[1m"
-declare -r color_purple="\e[0;35m\033[1m"
-declare -r color_turquoise="\e[0;36m\033[1m"
-declare -r color_gray="\e[0;37m\033[1m"
-declare -r color_end="\033[0m\e[0m"
+declare -r colors_init="\e[" # Initialization
+
+### Options
+declare -r txt_regul="${colors_init}0"
+declare -r txt_bold="${colors_init}1"
+
+### Base colors
+declare -r color_red=";31m"
+declare -r color_green=";32m"
+declare -r color_yellow=";33m"
+declare -r color_blue=";34m"
+declare -r color_purple=";35m"
+declare -r color_cyan=";36m"
+declare -r color_white=";37m"
+
+declare -r colors_end="${txt_regul}m" # RESET-END COLORS
+
+### Bold text colors
+declare -r col_txt_bld_red="${txt_bold}${color_red}"
+declare -r col_txt_bld_grn="${txt_bold}${color_green}"
+declare -r col_txt_bld_ylw="${txt_bold}${color_yellow}"
+declare -r col_txt_bld_blu="${txt_bold}${color_blue}"
+declare -r col_txt_bld_pur="${txt_bold}${color_purple}"
+declare -r col_txt_bld_cyn="${txt_bold}${color_cyan}"
+declare -r col_txt_bld_wht="${txt_bold}${color_white}"
 
 ## Symbols
-declare -r symbol_success="${color_green}[+]"
-declare -r symbol_info="${color_turquoise}[o]"
-declare -r symbol_error="${color_red}[x]"
-declare -r symbol_example="${color_yellow}[%]"
-declare -r symbol_progress="${color_yellow}[#]"
-declare -r symbol_interrupted="${color_blue}[!]"
-declare -r symbol_completed="${color_green}[*]"
+declare -r symbol_success="${col_txt_bld_grn}[+]"
+declare -r symbol_info="${col_txt_bld_cyn}[o]"
+declare -r symbol_error="${col_txt_bld_red}[x]"
+declare -r symbol_example="${col_txt_bld_ylw}[%]"
+declare -r symbol_progress="${col_txt_bld_ylw}[#]"
+declare -r symbol_interrupted="${col_txt_bld_blu}[!]"
+declare -r symbol_completed="${col_txt_bld_grn}[*]"
 
-# Check if the user is root or is in the docker group
+# Check the execution privileges
 if [[ $EUID -ne 0 ]] && [[ $(groups | grep -o '\bdocker\b') != "docker" ]]; then
-    echo -e "\n${symbol_error} ${color_gray}This script requires root privileges or membership in the docker group.${color_end}\n"
+    echo -e "\n${symbol_error} ${col_txt_bld_wht}This script requires root privileges or membership in the docker group.${colors_end}\n"
     exit 1
 fi
 
 # Functions
 ## Delete containers
 function delete_containers() {
-    local containers="$(docker container ls -aq 2>/dev/null)"
+    local containers=$(docker container ls -aq)
 
     if [[ $containers ]]; then
-        echo -e "\n${symbol_progress} ${color_gray}Deleting all containers\n"
+        echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all containers\n"
         docker container rm -f $containers &>/dev/null
     fi
 }
 
 ## Delete images
 function delete_images() {
-    local images="$(docker image ls -q 2>/dev/null)"
+    local images=$(docker image ls -q)
 
     if [[ $images ]]; then
-        echo -e "\n${symbol_progress} ${color_gray}Deleting all images\n"
+        echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all images\n"
         docker image rm -f $images &>/dev/null
     fi
 }
 
 ## Delete volumes
 function delete_volumes() {
-    local volumes="$(docker volume ls -q 2>/dev/null)"
+    local volumes=$(docker volume ls -q)
 
     if [[ $volumes ]]; then
-        echo -e "\n${symbol_progress} ${color_gray}Deleting all volumes\n"
+        echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all volumes\n"
         docker volume rm -f $volumes &>/dev/null
     fi
 }
 
 ## Delete networks (except the defaults)
 function delete_networks() {
-    local all_networks="$(docker network ls --format '{{.Name}}' 2>/dev/null)"
+    local all_networks=$(docker network ls --format "{{.Name}}")
     local default_networks=("bridge" "host" "none")
     local networks=()
 
@@ -70,33 +87,33 @@ function delete_networks() {
     done
 
     if [[ ${#networks[@]} -gt 0 ]]; then
-        echo -e "\n${symbol_progress} ${color_gray}Deleting networks [except defaults]\n"
+        echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting networks [except defaults]\n"
         docker network rm "${networks[@]}" &>/dev/null
     fi
 }
 
-## Help panel to show
+## Show the help panel
 function help_panel() {
-    local optarg_containers="${color_yellow}-c"
-    local optarg_images="${color_yellow}-i"
-    local optarg_volumes="${color_yellow}-v"
-    local optarg_networks="${color_yellow}-n"
-    local optarg_all="${color_yellow}-a"
-    local optarg_help="${color_yellow}-h"
-    local file_name="${color_purple}$0"
+    local optarg_containers="${col_txt_bld_ylw}-c"
+    local optarg_images="${col_txt_bld_ylw}-i"
+    local optarg_volumes="${col_txt_bld_ylw}-v"
+    local optarg_networks="${col_txt_bld_ylw}-n"
+    local optarg_all="${col_txt_bld_ylw}-a"
+    local optarg_help="${col_txt_bld_ylw}-h"
+    local file_name="${col_txt_bld_pur}$0"
 
-    echo -e "\n${symbol_info} ${color_gray}Usage: ${file_name}"
-    echo -e "\n\t${optarg_containers} ${color_gray}\tDelete containers."
-    echo -e "\n\t${optarg_images} ${color_gray}\tDelete images."
-    echo -e "\n\t${optarg_volumes} ${color_gray}\tDelete volumes."
-    echo -e "\n\t${optarg_networks} ${color_gray}\tDelete networks."
-    echo -e "\n\t${optarg_all} ${color_gray}\tDelete all (containers, images, volumes, networks)."
-    echo -e "\n\t${optarg_help} ${color_gray}\tShow this help message.${color_end}\n"
+    echo -e "\n${symbol_info} ${col_txt_bld_wht}Usage: ${file_name}"
+    echo -e "\n\t${optarg_containers} ${col_txt_bld_wht}\tDelete containers."
+    echo -e "\n\t${optarg_images} ${col_txt_bld_wht}\tDelete images."
+    echo -e "\n\t${optarg_volumes} ${col_txt_bld_wht}\tDelete volumes."
+    echo -e "\n\t${optarg_networks} ${col_txt_bld_wht}\tDelete networks."
+    echo -e "\n\t${optarg_all} ${col_txt_bld_wht}\tDelete all (containers, images, volumes, networks)."
+    echo -e "\n\t${optarg_help} ${col_txt_bld_wht}\tShow this help message.${colors_end}\n"
 }
 
 ## Ctrl + c function
 function signal_handler() {
-    echo -e "\n${symbol_interrupted} Exiting${color_end}\n"
+    echo -e "\n${symbol_interrupted} Exiting${colors_end}\n"
     tput cnorm
     exit 1
 }
@@ -122,7 +139,7 @@ while getopts ":civnah" arg; do
             delete_networks
             ;;
         a)
-            echo -e "\n${symbol_progress} ${color_gray}Deleting all resources\n"
+            echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all resources\n"
             delete_containers
             delete_images
             delete_volumes
@@ -135,24 +152,26 @@ while getopts ":civnah" arg; do
             ;;
         \?)
             ### Invalid -option
-            echo -e "\n${symbol_error} ${color_gray}Invalid option: ${color_yellow}-$OPTARG\n" >&2
+            echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
             tput cnorm
             exit 1
             ;;
         :)
             ### Missing value of the -option
-            echo -e "\n${symbol_error} ${color_gray}Option ${color_yellow}-$OPTARG ${color_gray}requires an argument\n" >&2
+            echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument\n" >&2
             tput cnorm
             exit 1
             ;;
     esac
 done
 
+# Check if the user is root or in the docker group
+
 if [[ $# -eq 0 ]]; then
     help_panel
     tput cnorm
     exit 0
 else
-    echo -e "\n${symbol_completed} Done${color_end}\n"
+    echo -e "\n${symbol_completed} Done${colors_end}\n"
     tput cnorm
 fi

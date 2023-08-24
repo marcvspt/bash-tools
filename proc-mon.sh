@@ -2,10 +2,22 @@
 
 # Globarl vars
 ## Colors
-declare -r color_blue="\e[0;34m\033[1m"
+declare -r colors_init="\e[" # Initialization
+
+### Options
+declare -r txt_regul="${colors_init}0"
+declare -r txt_bold="${colors_init}1"
+
+### Base colors
+declare -r color_blue=";34m"
+
+declare -r colors_end="${txt_regul}m" # RESET-END COLORS
+
+### Bold text colors
+declare -r col_txt_bld_blu="${txt_bold}${color_blue}"
 
 ## Symbols
-declare -r symbol_interrupted="${color_blue}[!]"
+declare -r symbol_interrupted="${col_txt_bld_blu}[!]"
 
 ## Ctrl + c function
 function signal_handler() {

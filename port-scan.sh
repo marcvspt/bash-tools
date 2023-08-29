@@ -41,21 +41,25 @@ declare -r symbol_completed="${col_txt_bld_grn}[*]"
 ## Validate ips, hosts and domains
 function validate_host() {
     local host="$1"
-    if [[ "$host" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ || "$host" =~ ^[a-zA-Z0-9.-]+$ ]]; then
-        return 0
-    else
-        return 1
+
+    local host_regex_ip='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+    local host_regex_name='^[a-zA-Z0-9.-]+$'
+    if [[ ! "$host" =~ $host_regex_ip || ! "$host" =~ $host_regex_name ]]; then
+        echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid host: ${col_txt_bld_cyn}$host\n" >&2
+        echo -en "${colors_end}"
+        exit 1
     fi
 }
 
 ## Validate ports
 function validate_ports() {
     local ports="$1"
+
     local port_regex='^[0-9]+(-[0-9]+)?(,[0-9]+(-[0-9]+)?)*$'
-    if [[ "$ports" =~ $port_regex ]]; then
-        return 0
-    else
-        return 1
+    if [[ ! "$ports" =~ $port_regex ]]; then
+        echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid port(s): ${col_txt_bld_cyn}${port_args[@]}\n" >&2
+        echo -en "${colors_end}"
+        exit 1
     fi
 }
 
@@ -85,11 +89,13 @@ function check_port() {
     local host=$1
     local port=$2
 
-    timeout 1 bash -c "echo '' > /dev/tcp/$host/$port" &> /dev/null
+    timeout 1 bash -c "echo '' > /dev/tcp/$host/$port" &>/dev/null
 
     if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${col_txt_bld_wht}Port ${col_txt_bld_cyn}$port${col_txt_bld_wht} - OPEN"
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Help panel to show
@@ -108,13 +114,16 @@ function help_panel() {
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_dest} ${col_txt_bld_wht}192.168.1.150 ${optarg_ports} ${col_txt_bld_wht}80"
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_dest} ${col_txt_bld_wht}192.168.1.150 ${optarg_ports} ${col_txt_bld_wht}1-1000"
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_dest} ${col_txt_bld_wht}192.168.1.150 ${optarg_ports} ${col_txt_bld_wht}22,80,3306"
-    echo -e "\n\t${symbol_example} ${file_name} ${optarg_dest} ${col_txt_bld_wht}192.168.1.150 ${optarg_ports} ${col_txt_bld_wht}1-1000,3306${colors_end}\n"
+    echo -e "\n\t${symbol_example} ${file_name} ${optarg_dest} ${col_txt_bld_wht}192.168.1.150 ${optarg_ports} ${col_txt_bld_wht}1-1000,3306\n"
+
+    echo -en "${colors_end}"
 }
 
 
 ## Ctrl + c function
 function signal_handler() {
-    echo -e "\n${symbol_interrupted} Exiting${colors_end}\n"
+    echo -e "\n${symbol_interrupted} Exiting\n"
+    echo -en "${colors_end}"
     tput cnorm
     exit 1
 }
@@ -129,18 +138,12 @@ while getopts ":d:p:h" opt; do
         d)
             ### -d get value of the argumente -d (destination = ip, host, name or domain)
             declare host="$OPTARG"
-            if ! validate_host "$host"; then
-                echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid host: ${col_txt_bld_cyn}$host\n" >&2
-                exit 1
-            fi
+            validate_host "$host"
             ;;
         p)
             ### get value of the argumente -p (ports)
             declare port_args+=("$OPTARG")
-            if ! validate_ports "${port_args[@]}"; then
-                echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid port(s): ${col_txt_bld_cyn}${port_args[@]}\n" >&2
-                exit 1
-            fi
+            validate_ports "${port_args[@]}"
             ;;
         h)
             ### show the help panel
@@ -151,11 +154,13 @@ while getopts ":d:p:h" opt; do
         \?)
             ### Invalid -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
+            echo -en "${colors_end}"
             exit 1
             ;;
         :)
             ### Missing value of the -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument\n" >&2
+            echo -en "${colors_end}"
             exit 1
             ;;
     esac
@@ -176,7 +181,8 @@ else
     for port in $ports; do
         check_port $host $port &
     done; wait
-fi
 
-echo -e "\n${symbol_completed} Scanning completed${colors_end}\n"
-tput cnorm
+    echo -e "\n${symbol_completed} Scanning completed\n"
+    echo -en "${colors_end}"
+    tput cnorm
+fi

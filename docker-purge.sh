@@ -39,7 +39,8 @@ declare -r symbol_completed="${col_txt_bld_grn}[*]"
 
 # Check the execution privileges
 if [[ $EUID -ne 0 ]] && [[ $(groups | grep -o '\bdocker\b') != "docker" ]]; then
-    echo -e "\n${symbol_error} ${col_txt_bld_wht}This script requires root privileges or membership in the docker group.${colors_end}\n"
+    echo -e "\n${symbol_error} ${col_txt_bld_wht}This script requires root privileges or membership in the docker group.\n"
+    echo -en "${colors_end}"
     exit 1
 fi
 
@@ -52,6 +53,8 @@ function delete_containers() {
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all containers\n"
         docker container rm -f $containers &>/dev/null
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Delete images
@@ -62,6 +65,8 @@ function delete_images() {
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all images\n"
         docker image rm -f $images &>/dev/null
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Delete volumes
@@ -72,6 +77,8 @@ function delete_volumes() {
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all volumes\n"
         docker volume rm -f $volumes &>/dev/null
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Delete networks (except the defaults)
@@ -90,6 +97,8 @@ function delete_networks() {
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting networks [except defaults]\n"
         docker network rm "${networks[@]}" &>/dev/null
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Show the help panel
@@ -123,22 +132,29 @@ trap signal_handler INT
 
 # Main
 ## Parse options and arguments
+declare -i parameter_counter=0
+
 tput civis
 while getopts ":civnah" arg; do
     case $arg in
         c)
+            let parameter_counter++
             delete_containers
             ;;
         i)
+            let parameter_counter++
             delete_images
             ;;
         v)
+            let parameter_counter++
             delete_volumes
             ;;
         n)
+            let parameter_counter++
             delete_networks
             ;;
         a)
+            let parameter_counter++
             echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all resources\n"
             delete_containers
             delete_images
@@ -146,32 +162,41 @@ while getopts ":civnah" arg; do
             delete_networks
             ;;
         h)
+            let parameter_counter++
             help_panel
             tput cnorm
             exit 0
             ;;
         \?)
+            let parameter_counter++
             ### Invalid -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
+            echo -en "${colors_end}"
             tput cnorm
             exit 1
             ;;
         :)
+            let parameter_counter++
             ### Missing value of the -option
-            echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument\n" >&2
+            echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument.\n" >&2
+            echo -en "${colors_end}"
             tput cnorm
             exit 1
             ;;
     esac
 done
 
-# Check if the user is root or in the docker group
-
 if [[ $# -eq 0 ]]; then
     help_panel
     tput cnorm
     exit 0
-else
-    echo -e "\n${symbol_completed} Done${colors_end}\n"
+elif [[ $parameter_counter -gt 0 ]]; then
+    echo -e "\n${symbol_completed} Done!\n"
+    echo -en "${colors_end}"
     tput cnorm
+else
+    echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
+    echo -en "${colors_end}"
+    tput cnorm
+    exit 1
 fi

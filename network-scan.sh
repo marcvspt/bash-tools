@@ -42,16 +42,18 @@ declare -r symbol_completed="${col_txt_bld_grn}[*]"
 function validate_network() {
     local network_cidr="$1"
 
-    if [[ ! $network_cidr =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$ ]]; then
-        echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid network format: ${col_txt_bld_cyn}$network_cidr${colors_end}\n"
-        exit 1
-    fi
-
     IFS='/.' read -ra cidr_parts <<< "$network_cidr"
     local prefix_bits="${cidr_parts[4]}"
 
-    if (( $prefix_bits < 0 || $prefix_bits > 32 )); then
+    local prefix_bits_regex='^[0-9]{1,2}$'
+    if [[ $prefix_bits -lt 0 || $prefix_bits -gt 32 ]] || [[ ! $prefix_bits =~ $prefix_bits_regex ]]; then
         echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid prefix bits: ${col_txt_bld_cyn}$prefix_bits${colors_end}\n"
+        exit 1
+    fi
+
+    local network_cidr_regex='^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$'
+    if [[ ! $network_cidr =~ $network_cidr_regex ]]; then
+        echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid network format: ${col_txt_bld_cyn}$network_cidr${colors_end}\n"
         exit 1
     fi
 }
@@ -59,6 +61,7 @@ function validate_network() {
 ## Calculate the total hosts in a network
 function calculate_hosts() {
     local network_cidr="$1"
+
     IFS='/' read -ra net_info <<< "$network_cidr"
     local base_network="${net_info[0]}"
     local netmask_bits="${net_info[1]}"
@@ -68,10 +71,9 @@ function calculate_hosts() {
 
     local first_host=$((${octets[3]} + 1))
     local total_hosts=$((2 ** (32 - $netmask_bits) - 2))
-
     declare -a hosts=()
 
-    for (( host=first_host; host < total_hosts + first_host; host++ )); do
+    for (( host=$first_host; $host < $total_hosts + $first_host; host++ )); do
         local target="$network_prefix.$host"
         hosts+=("$target")
     done
@@ -81,13 +83,15 @@ function calculate_hosts() {
 
 ## Check if a host is ACTIVE in a NETWORK
 function check_host() {
-    local host=$1
+    local host="$1"
 
     timeout 1 bash -c "ping -c 1 $host" &>/dev/null
 
     if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${col_txt_bld_wht}Host ${col_txt_bld_cyn}$host ${col_txt_bld_wht}- ACTIVE"
     fi
+
+    echo -en "${colors_end}"
 }
 
 ## Help panel to show
@@ -104,12 +108,15 @@ function help_panel() {
     echo -e "\n${symbol_info} ${col_txt_bld_wht}Examples:"
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_network} ${col_txt_bld_wht}10.0.0.0/11"
     echo -e "\n\t${symbol_example} ${file_name} ${optarg_network} ${col_txt_bld_wht}172.16.32.0/16"
-    echo -e "\n\t${symbol_example} ${file_name} ${optarg_network} ${col_txt_bld_wht}192.168.1.0/29${colors_end}\n"
+    echo -e "\n\t${symbol_example} ${file_name} ${optarg_network} ${col_txt_bld_wht}192.168.1.0/29\n"
+
+    echo -en "${colors_end}"
 }
 
 ## Ctrl + C function
 function signal_handler() {
-    echo -e "\n${symbol_interrupted} Exiting${colors_end}\n"
+    echo -e "\n${symbol_interrupted} Exiting\n"
+    echo -en "${colors_end}"
     tput cnorm
     exit 1
 }
@@ -123,8 +130,8 @@ while getopts ":n:h" arg; do
     case $arg in
         n)
             ### get value of the argumente -n (network)
-            validate_network "$OPTARG"
             declare network_cidr="$OPTARG"
+            validate_network "$network_cidr"
             ;;
         h)
             ### show the help panel
@@ -134,13 +141,15 @@ while getopts ":n:h" arg; do
             ;;
         \?)
             ### Invalid -option
-            echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG${colors_end}\n" >&2
+            echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
+            echo -en "${colors_end}"
             tput cnorm
             exit 1
             ;;
         :)
             ### Missing value of the -option
-            echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument${colors_end}\n" >&2
+            echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument.\n" >&2
+            echo -en "${colors_end}"
             tput cnorm
             exit 1
             ;;
@@ -162,7 +171,9 @@ else
     for host in ${hosts[@]}; do
         check_host "$host" &
     done; wait
-fi
 
-echo -e "\n${symbol_completed} Scanning completed${colors_end}\n"
-tput cnorm
+    echo -e "\n${symbol_completed} Scanning completed.\n"
+    tput cnorm
+
+    echo -en "${colors_end}"
+fi

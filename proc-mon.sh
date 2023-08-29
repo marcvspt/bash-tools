@@ -21,7 +21,8 @@ declare -r symbol_interrupted="${col_txt_bld_blu}[!]"
 
 ## Ctrl + c function
 function signal_handler() {
-    echo -e "\n${symbol_interrupted} Exiting${color_end}\n"
+    echo -e "\n${symbol_interrupted} Exiting\n"
+    echo -en "${color_end}"
     tput cnorm
     exit 1
 }

@@ -167,12 +167,7 @@ while getopts ":d:p:h" opt; do
 done
 
 ## Perform the port scan
-if [[ -z "$host" ]] || [[ ${#port_args[@]} -eq 0 ]]; then
-    ### Missing arguments or values
-    help_panel
-    tput cnorm
-    exit 1
-else
+if [[ "$host" || ${#port_args[@]} -gt 0 ]]; then
     tput civis
     echo -e "\n${symbol_progress} ${col_txt_bld_wht}Scanning port(s): ${col_txt_bld_cyn}${port_args[@]} ${col_txt_bld_wht}of ${col_txt_bld_cyn}$host\n"
 
@@ -185,4 +180,9 @@ else
     echo -e "\n${symbol_completed} Scanning completed\n"
     echo -en "${colors_end}"
     tput cnorm
+else
+    echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
+    echo -en "${colors_end}"
+    tput cnorm
+    exit 1
 fi

@@ -101,7 +101,7 @@ function check_port() {
 ## Help panel to show
 function help_panel() {
     local optarg_dest="${col_txt_bld_ylw}-d"
-    local optarg_ports="${col_txt_bld_wht}-p"
+    local optarg_ports="${col_txt_bld_ylw}-p"
     local optarg_help="${col_txt_bld_ylw}-h"
     local file_name="${col_txt_bld_pur}$0"
 
@@ -148,7 +148,6 @@ while getopts ":d:p:h" opt; do
         h)
             ### show the help panel
             help_panel
-            tput cnorm
             exit 0
             ;;
         \?)
@@ -166,8 +165,13 @@ while getopts ":d:p:h" opt; do
     esac
 done
 
+if [[ $# -eq 0 ]]; then
+    help_panel
+    exit 0
+fi
+
 ## Perform the port scan
-if [[ "$host" || ${#port_args[@]} -gt 0 ]]; then
+if [[ "$host" || "${ports_args[@]}" || ${#port_args[@]} -gt 0 ]]; then
     tput civis
     echo -e "\n${symbol_progress} ${col_txt_bld_wht}Scanning port(s): ${col_txt_bld_cyn}${port_args[@]} ${col_txt_bld_wht}of ${col_txt_bld_cyn}$host\n"
 
@@ -183,6 +187,5 @@ if [[ "$host" || ${#port_args[@]} -gt 0 ]]; then
 else
     echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
     echo -en "${colors_end}"
-    tput cnorm
     exit 1
 fi

@@ -162,7 +162,6 @@ while getopts ":civnah" arg; do
             delete_networks
             ;;
         h)
-            let parameter_counter++
             help_panel
             tput cnorm
             exit 0
@@ -190,7 +189,9 @@ if [[ $# -eq 0 ]]; then
     help_panel
     tput cnorm
     exit 0
-elif [[ $parameter_counter -gt 0 ]]; then
+fi
+
+if [[ $parameter_counter -gt 0 ]]; then
     echo -e "\n${symbol_completed} Done!\n"
     echo -en "${colors_end}"
     tput cnorm

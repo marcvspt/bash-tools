@@ -136,33 +136,30 @@ while getopts ":n:h" arg; do
         h)
             ### show the help panel
             help_panel
-            tput cnorm
             exit 0
             ;;
         \?)
             ### Invalid -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
             echo -en "${colors_end}"
-            tput cnorm
             exit 1
             ;;
         :)
             ### Missing value of the -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument.\n" >&2
             echo -en "${colors_end}"
-            tput cnorm
             exit 1
             ;;
     esac
 done
 
-## Perform the network scan
-if [[ -z "$network_cidr" ]]; then
-    ### Missing arguments or values
+if [[ $# -eq 0 ]]; then
     help_panel
-    tput cnorm
-    exit 1
-else
+    exit 0
+fi
+
+## Perform the network scan
+if [[ "$network_cidr" ]]; then
     tput civis
     echo -e "\n${symbol_progress} ${col_txt_bld_wht}Scanning network: ${col_txt_bld_cyn}$network_cidr\n"
 
@@ -176,4 +173,8 @@ else
     tput cnorm
 
     echo -en "${colors_end}"
+else
+    echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
+    echo -en "${colors_end}"
+    exit 1
 fi

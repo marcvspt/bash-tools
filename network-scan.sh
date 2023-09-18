@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Globarl vars
 ## Colors
@@ -85,7 +85,7 @@ function calculate_hosts() {
 function check_host() {
     local host="$1"
 
-    timeout 1 bash -c "ping -c 1 $host" &>/dev/null
+    /usr/bin/timeout 1 bash -c "ping -c 1 $host" &>/dev/null
 
     if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${col_txt_bld_wht}Host ${col_txt_bld_cyn}$host ${col_txt_bld_wht}- ACTIVE"
@@ -117,7 +117,7 @@ function help_panel() {
 function signal_handler() {
     echo -e "\n${symbol_interrupted} Exiting\n"
     echo -en "${colors_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 1
 }
 
@@ -160,7 +160,7 @@ fi
 
 ## Perform the network scan
 if [[ "$network_cidr" ]]; then
-    tput civis
+    /usr/bin/tput civis
     echo -e "\n${symbol_progress} ${col_txt_bld_wht}Scanning network: ${col_txt_bld_cyn}$network_cidr\n"
 
     ### Check each host
@@ -170,7 +170,7 @@ if [[ "$network_cidr" ]]; then
     done; wait
 
     echo -e "\n${symbol_completed} Scanning completed.\n"
-    tput cnorm
+    /usr/bin/tput cnorm
 
     echo -en "${colors_end}"
 else

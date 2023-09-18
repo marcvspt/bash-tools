@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Colors
 declare -r colors_init="\e[" # Initialization

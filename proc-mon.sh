@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Globarl vars
 ## Colors
@@ -23,7 +23,7 @@ declare -r symbol_interrupted="${col_txt_bld_blu}[!]"
 function signal_handler() {
     echo -e "\n${symbol_interrupted} Exiting\n"
     echo -en "${color_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 1
 }
 
@@ -31,17 +31,17 @@ function main() {
     # Redirect Ctrl + c to a function
     trap signal_handler INT
 
-    tput civis
-    local old_process=$(ps -eo user,command)
+    /usr/bin/tput civis
+    local old_process=$(/usr/bin/ps -eo user,command)
 
     while true; do
-        local new_process=$(ps -eo user,command)
+        local new_process=$(/usr/bin/ps -eo user,command)
 
-        diff <(echo "$old_process") <(echo "$new_process") | grep "[\>\<]" | grep -vE "procmon|command|kworker"
+        /usr/bin/diff <(echo "$old_process") <(echo "$new_process") | /usr/bin/grep "[\>\<]" | /usr/bin/grep -vE "procmon|command|kworker"
 
         old_process=$new_process
     done
-    tput cnorm
+    /usr/bin/tput cnorm
 }
 
 main

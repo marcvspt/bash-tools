@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Globarl vars
 ## Colors
@@ -38,7 +38,7 @@ declare -r symbol_interrupted="${col_txt_bld_blu}[!]"
 declare -r symbol_completed="${col_txt_bld_grn}[*]"
 
 # Check the execution privileges
-if [[ $EUID -ne 0 ]] && [[ $(groups | grep -o '\bdocker\b') != "docker" ]]; then
+if [[ $EUID -ne 0 ]] && [[ $(/usr/bin/groups | /usr/bin/grep -o '\bdocker\b') != "docker" ]]; then
     echo -e "\n${symbol_error} ${col_txt_bld_wht}This script requires root privileges or membership in the docker group.\n"
     echo -en "${colors_end}"
     exit 1
@@ -47,11 +47,11 @@ fi
 # Functions
 ## Delete containers
 function delete_containers() {
-    local containers=$(docker container ls -aq)
+    local containers=$(/usr/bin/docker container ls -aq)
 
     if [[ $containers ]]; then
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all containers\n"
-        docker container rm -f $containers &>/dev/null
+        /usr/bin/docker container rm -f $containers &>/dev/null
     fi
 
     echo -en "${colors_end}"
@@ -59,11 +59,11 @@ function delete_containers() {
 
 ## Delete images
 function delete_images() {
-    local images=$(docker image ls -q)
+    local images=$(/usr/bin/docker image ls -q)
 
     if [[ $images ]]; then
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all images\n"
-        docker image rm -f $images &>/dev/null
+        /usr/bin/docker image rm -f $images &>/dev/null
     fi
 
     echo -en "${colors_end}"
@@ -71,11 +71,11 @@ function delete_images() {
 
 ## Delete volumes
 function delete_volumes() {
-    local volumes=$(docker volume ls -q)
+    local volumes=$(/usr/bin/docker volume ls -q)
 
     if [[ $volumes ]]; then
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting all volumes\n"
-        docker volume rm -f $volumes &>/dev/null
+        /usr/bin/docker volume rm -f $volumes &>/dev/null
     fi
 
     echo -en "${colors_end}"
@@ -83,7 +83,7 @@ function delete_volumes() {
 
 ## Delete networks (except the defaults)
 function delete_networks() {
-    local all_networks=$(docker network ls --format "{{.Name}}")
+    local all_networks=$(/usr/bin/docker network ls --format "{{.Name}}")
     local default_networks=("bridge" "host" "none")
     local networks=()
 
@@ -95,7 +95,7 @@ function delete_networks() {
 
     if [[ ${#networks[@]} -gt 0 ]]; then
         echo -e "\n${symbol_progress} ${col_txt_bld_wht}Deleting networks [except defaults]\n"
-        docker network rm "${networks[@]}" &>/dev/null
+        /usr/bin/docker network rm "${networks[@]}" &>/dev/null
     fi
 
     echo -en "${colors_end}"
@@ -123,7 +123,7 @@ function help_panel() {
 ## Ctrl + c function
 function signal_handler() {
     echo -e "\n${symbol_interrupted} Exiting${colors_end}\n"
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 1
 }
 
@@ -134,7 +134,7 @@ trap signal_handler INT
 ## Parse options and arguments
 declare -i parameter_counter=0
 
-tput civis
+/usr/bin/tput civis
 while getopts ":civnah" arg; do
     case $arg in
         c)
@@ -163,7 +163,7 @@ while getopts ":civnah" arg; do
             ;;
         h)
             help_panel
-            tput cnorm
+            /usr/bin/tput cnorm
             exit 0
             ;;
         \?)
@@ -171,7 +171,7 @@ while getopts ":civnah" arg; do
             ### Invalid -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid option: ${col_txt_bld_ylw}-$OPTARG\n" >&2
             echo -en "${colors_end}"
-            tput cnorm
+            /usr/bin/tput cnorm
             exit 1
             ;;
         :)
@@ -179,7 +179,7 @@ while getopts ":civnah" arg; do
             ### Missing value of the -option
             echo -e "\n${symbol_error} ${col_txt_bld_wht}Option ${col_txt_bld_ylw}-$OPTARG ${col_txt_bld_wht}requires an argument.\n" >&2
             echo -en "${colors_end}"
-            tput cnorm
+            /usr/bin/tput cnorm
             exit 1
             ;;
     esac
@@ -187,17 +187,17 @@ done
 
 if [[ $# -eq 0 ]]; then
     help_panel
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 0
 fi
 
 if [[ $parameter_counter -gt 0 ]]; then
     echo -e "\n${symbol_completed} Done!\n"
     echo -en "${colors_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
 else
     echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
     echo -en "${colors_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 1
 fi

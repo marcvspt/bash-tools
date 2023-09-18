@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Globarl vars
 ## Colors
@@ -74,7 +74,7 @@ function calculate_ports() {
             if [[ $port == *-* ]]; then
                 local start_port=${port%-*}
                 local end_port=${port#*-}
-                ports+=($(seq $start_port $end_port))
+                ports+=($(/usr/bin/seq $start_port $end_port))
             else
                 ports+=($port)
             fi
@@ -89,7 +89,7 @@ function check_port() {
     local host=$1
     local port=$2
 
-    timeout 1 bash -c "echo '' > /dev/tcp/$host/$port" &>/dev/null
+    /usr/bin/timeout 1 bash -c "echo '' > /dev/tcp/$host/$port" &>/dev/null
 
     if [[ $? -eq 0 ]]; then
         echo -e "\t${symbol_success} ${col_txt_bld_wht}Port ${col_txt_bld_cyn}$port${col_txt_bld_wht} - OPEN"
@@ -124,7 +124,7 @@ function help_panel() {
 function signal_handler() {
     echo -e "\n${symbol_interrupted} Exiting\n"
     echo -en "${colors_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
     exit 1
 }
 
@@ -172,7 +172,7 @@ fi
 
 ## Perform the port scan
 if [[ "$host" || "${ports_args[@]}" || ${#port_args[@]} -gt 0 ]]; then
-    tput civis
+    /usr/bin/tput civis
     echo -e "\n${symbol_progress} ${col_txt_bld_wht}Scanning port(s): ${col_txt_bld_cyn}${port_args[@]} ${col_txt_bld_wht}of ${col_txt_bld_cyn}$host\n"
 
     ### Check each port of the host
@@ -183,7 +183,7 @@ if [[ "$host" || "${ports_args[@]}" || ${#port_args[@]} -gt 0 ]]; then
 
     echo -e "\n${symbol_completed} Scanning completed\n"
     echo -en "${colors_end}"
-    tput cnorm
+    /usr/bin/tput cnorm
 else
     echo -e "\n${symbol_error} ${col_txt_bld_wht}Invalid argument.\n"
     echo -en "${colors_end}"
